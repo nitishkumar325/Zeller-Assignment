@@ -1,8 +1,9 @@
+import { gql } from 'graphql-request';
 import type { RemoteCustomer } from '../types';
 import { graphqlRequest } from './graphqlClient';
 
-// Kept as a document so the query stays easy to read and to test.
-export const LIST_CUSTOMERS_QUERY = `
+// The document graphql-request sends to AppSync.
+export const LIST_CUSTOMERS_QUERY = gql`
   query ListZellerCustomers($limit: Int, $nextToken: String) {
     listZellerCustomers(limit: $limit, nextToken: $nextToken) {
       items {
@@ -33,9 +34,8 @@ const MAX_PAGES = 20;
 export async function fetchAllCustomers(): Promise<RemoteCustomer[]> {
   const collected: RemoteCustomer[] = [];
   let nextToken: string | undefined;
-  let page = 0;
 
-  while (page < MAX_PAGES) {
+
     const data = await graphqlRequest<ListResponse>(LIST_CUSTOMERS_QUERY, {
       limit: 100,
       nextToken,
@@ -48,14 +48,5 @@ export async function fetchAllCustomers(): Promise<RemoteCustomer[]> {
         collected.push(item);
       }
     }
-
-    const token = connection?.nextToken;
-    if (!token) {
-      break;
-    }
-    nextToken = token;
-    page += 1;
-  }
-
   return collected;
 }

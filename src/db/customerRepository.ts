@@ -1,4 +1,5 @@
 import Realm from 'realm';
+import { fetchAllCustomers } from '../api/fetchCustomers';
 import type { Customer, CustomerInput, RemoteCustomer } from '../types';
 import { customersToUpsert } from '../utils/syncCustomers';
 import { CUSTOMER_SCHEMA, DELETED_SCHEMA } from './schema';
@@ -47,6 +48,17 @@ export function watchCustomers(realm: Realm, onChange: () => void): () => void {
   return () => {
     rows.removeListener(listener);
   };
+}
+
+/**
+ * Initial load and pull-to-refresh.
+ * Asks the GraphQL API for listZellerCustomers, then writes those people into Realm.
+ * The screen reads the table after this returns, so the first list is the API's list.
+ */
+export async function loadCustomersFromApi(realm: Realm): Promise<Customer[]> {
+  const remoteCustomers = await fetchAllCustomers();
+  saveRemoteCustomers(realm, remoteCustomers);
+  return readCustomers(realm);
 }
 
 /**

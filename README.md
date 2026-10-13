@@ -21,11 +21,12 @@ Users are loaded with the `listZellerCustomers` GraphQL query, saved in Realm, a
 ```bash
 yarn install
 cd ios && pod install && cd ..   # iOS only
+yarn mock       # local GraphQL on port 9002
 yarn start
 yarn ios        # or yarn android
 ```
 
-The AppSync URL and API key live in `src/config/awsExports.ts`. They come from the challenge brief.
+The AppSync API key in the challenge returns 401, so the app posts `listZellerCustomers` to the mock server instead (`http://localhost:9002/graphql` on the iOS simulator, `http://10.0.2.2:9002/graphql` on the Android emulator). Start it with `yarn mock` before opening the app. The response is saved in Realm, and the list reads that local copy.
 
 ## Tests
 
@@ -37,8 +38,8 @@ The tests cover the form rules, the tab and search filtering, how a refresh merg
 
 ## How the data moves
 
-1. On launch, and when you pull to refresh, the app runs `listZellerCustomers`.
+1. On launch, and when you pull to refresh, a Redux thunk sends `listZellerCustomers` to the mock server.
 2. Those rows are written into Realm. A user you edited or deleted on the device is left as you left them.
-3. The list re-renders from Realm.
+3. A Realm listener copies the table into the Redux store, and the list renders from that.
 
 If the network call fails, the last saved list stays on screen.

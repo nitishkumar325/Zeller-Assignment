@@ -27,7 +27,9 @@ export function fullName(customer: {
   firstName: string;
   lastName: string;
 }): string {
-  return `${customer.firstName} ${customer.lastName}`.replace(/\s+/g, ' ').trim();
+  return `${customer.firstName} ${customer.lastName}`
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /** The letter drawn inside the blue square on each row. */

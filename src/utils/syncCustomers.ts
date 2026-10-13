@@ -13,7 +13,7 @@ export function remoteToCustomer(remote: RemoteCustomer): Customer | null {
   const { firstName, lastName } = splitName(remote.name);
   return {
     id: remote.id,
-    firstName,
+    firstName: firstName || 'Unknown',
     lastName,
     email: (remote.email ?? '').trim(),
     role: normaliseRole(remote.role),
@@ -36,8 +36,10 @@ export function customersToUpsert(
   const localById = new Map(existing.map(customer => [customer.id, customer]));
   const upserts: Customer[] = [];
 
+  console.log("remoteCustomers",remoteCustomers,deletedIds)
+
   for (const remote of remoteCustomers) {
-    if (!remote.id || deleted.has(remote.id)) {
+    if (!remote.hasOwnProperty('id') || deleted.has(remote.id)) {
       continue;
     }
 
@@ -51,6 +53,7 @@ export function customersToUpsert(
       upserts.push(next);
     }
   }
+  console.log("upserts",upserts)
 
   return upserts;
 }

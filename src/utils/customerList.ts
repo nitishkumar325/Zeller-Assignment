@@ -15,16 +15,16 @@ export function customersForTab(
   tab: ListTab,
   query: string,
 ): Customer[] {
-  const needle = query.trim().toLowerCase();
+  const hasSearchQuery = query.trim().toLowerCase();
 
   return customers.filter(customer => {
     if (tab !== 'All' && customer.role !== tab) {
       return false;
     }
-    if (!needle) {
+    if (!hasSearchQuery) {
       return true;
     }
-    return fullName(customer).toLowerCase().includes(needle);
+    return fullName(customer).toLowerCase().includes(hasSearchQuery);
   });
 }
 
@@ -33,12 +33,12 @@ export function customersForTab(
  * Sort is case-insensitive so "brad" and "Barbara" share a section.
  */
 export function groupByLetter(customers: Customer[]): CustomerSection[] {
-  const sorted = [...customers].sort((a, b) =>
+  const sortElement = [...customers].sort((a, b) =>
     fullName(a).localeCompare(fullName(b), undefined, { sensitivity: 'base' }),
   );
 
   const sections: CustomerSection[] = [];
-  for (const customer of sorted) {
+  for (const customer of sortElement) {
     const letter = (fullName(customer).charAt(0) || '#').toUpperCase();
     const current = sections[sections.length - 1];
     if (!current || current.title !== letter) {

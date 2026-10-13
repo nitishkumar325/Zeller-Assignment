@@ -1,53 +1,53 @@
+import {
+  ClientError,
+  GraphQLClient,
+  type RequestDocument,
+} from 'graphql-request';
 import awsConfig from '../config/awsExports';
-
-type GraphQLError = { message: string };
-
-type GraphQLResponse<T> = {
-  data?: T;
-  errors?: GraphQLError[];
-};
 
 const REQUEST_TIMEOUT_MS = 15000;
 
+// One GraphQL client for the local mock server. It does not check an API key.
+const client = new GraphQLClient(awsConfig.aws_appsync_graphqlEndpoint, {
+  // Look up fetch on each call so tests can replace it, and so the device uses its own.
+  fetch: (input, init) => fetch(input, init),
+});
+
 /**
- * Posts one GraphQL document to the AppSync endpoint.
- * Used by fetchAllCustomers. Throws a readable Error the screen can show.
+ * Runs a GraphQL query against the mock server and returns the `data` object.
+ * Used by loadCustomersFromApi for the first list and for pull-to-refresh.
  */
 export async function graphqlRequest<T>(
-  query: string,
+  query: RequestDocument,
   variables?: Record<string, unknown>,
 ): Promise<T> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(awsConfig.aws_appsync_graphqlEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': awsConfig.aws_appsync_apiKey,
-      },
-      body: JSON.stringify({ query, variables }),
+    const data = await client.request<T>({
+      document: query,
+      variables,
       signal: controller.signal,
     });
-
-    if (!response.ok) {
-      throw new Error(`Request failed (${response.status})`);
+    if (__DEV__) {
+      console.log('GraphQL API response', JSON.stringify(data, null, 2));
     }
-
-    const body = (await response.json()) as GraphQLResponse<T>;
-    if (body.errors && body.errors.length > 0) {
-      throw new Error(body.errors[0].message);
-    }
-    if (!body.data) {
-      throw new Error('The server did not return any data');
-    }
-    return body.data;
+    return data;
   } catch (error) {
+    if (error instanceof ClientError) {
+      if (__DEV__) {
+        console.log(
+          'GraphQL API response',
+          JSON.stringify(error.response, null, 2),
+        );
+      }
+      const graphqlMessage = error.response.errors?.[0]?.message;
+      throw new Error(graphqlMessage ?? error.message);
+    }
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('The request timed out');
     }
-    // fetch throws a TypeError when the radio / wifi is down.
     if (error instanceof TypeError) {
       throw new Error('Network request failed');
     }

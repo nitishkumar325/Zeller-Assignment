@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Animated, Pressable, StyleSheet, View } from 'react-native';
-import { colors } from '../theme';
+import { Animated, Pressable, View } from 'react-native';
+import { styles } from './SlidingTabs.styles';
+import { TabLabel } from './TabLabel';
 
 type Props = {
   tabs: readonly string[];
@@ -30,11 +31,15 @@ export function SlidingTabs({ tabs, progress, onPress }: Props) {
   return (
     <View
       style={styles.track}
-      onLayout={event => setTrackWidth(event.nativeEvent.layout.width)}>
+      onLayout={event => setTrackWidth(event.nativeEvent.layout.width)}
+    >
       {tabWidth > 0 ? (
         <Animated.View
           pointerEvents="none"
-          style={[styles.pill, { width: tabWidth - 8, transform: [{ translateX }] }]}
+          style={[
+            styles.pill,
+            { width: tabWidth - 8, transform: [{ translateX }] },
+          ]}
         />
       ) : null}
       {tabs.map((label, index) => (
@@ -44,62 +49,10 @@ export function SlidingTabs({ tabs, progress, onPress }: Props) {
           onPress={() => onPress(index)}
           accessibilityRole="button"
           accessibilityLabel={label}
-          testID={`tab-${label}`}>
+        >
           <TabLabel label={label} index={index} progress={progress} />
         </Pressable>
       ))}
     </View>
   );
 }
-
-type LabelProps = {
-  label: string;
-  index: number;
-  progress: Animated.Value;
-};
-
-function TabLabel({ label, index, progress }: LabelProps) {
-  const color = useMemo(
-    () =>
-      progress.interpolate({
-        inputRange: [index - 1, index, index + 1],
-        outputRange: [colors.muted, colors.blue, colors.muted],
-        extrapolate: 'clamp',
-      }),
-    [progress, index],
-  );
-
-  return <Animated.Text style={[styles.label, { color }]}>{label}</Animated.Text>;
-}
-
-const styles = StyleSheet.create({
-  track: {
-    flex: 1,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.track,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  pill: {
-    position: 'absolute',
-    top: 4,
-    bottom: 4,
-    left: 4,
-    borderRadius: 18,
-    backgroundColor: colors.blueSoft,
-    borderWidth: 1.5,
-    borderColor: colors.blue,
-  },
-  tab: {
-    flex: 1,
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

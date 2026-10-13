@@ -1,7 +1,8 @@
 import type { CustomerInput } from '../types';
 
 const NAME_PATTERN = /^[A-Za-z ]+$/;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN =
+  /^([A-Za-z0-9._%+-]+)@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)\.([A-Za-z]{2,})$/;
 const NAME_LIMIT = 50;
 
 export type FieldErrors = {
@@ -10,12 +11,20 @@ export type FieldErrors = {
   email?: string;
 };
 
+type ValidateOptions = {
+  // New users must include an email. Edits may keep a blank one.
+  requireEmail?: boolean;
+};
+
 /**
  * Checks the add / edit form.
  * Name is required, letters and spaces only, and 50 characters at most.
- * Email can be left blank, but if it is filled in it has to look like an email.
+ * A new user's email is required and must be a normal address like name@domain.com.
  */
-export function validateCustomerForm(input: CustomerInput): FieldErrors {
+export function validateCustomerForm(
+  input: CustomerInput,
+  options: ValidateOptions = {},
+): FieldErrors {
   const errors: FieldErrors = {};
   const firstName = input.firstName.trim();
   const lastName = input.lastName.trim();
@@ -39,7 +48,11 @@ export function validateCustomerForm(input: CustomerInput): FieldErrors {
     }
   }
 
-  if (email && !EMAIL_PATTERN.test(email)) {
+  if (!email) {
+    if (options.requireEmail) {
+      errors.email = 'Email is required';
+    }
+  } else if (!isValidEmail(email)) {
     errors.email = 'Enter a valid email address';
   }
 
@@ -48,6 +61,17 @@ export function validateCustomerForm(input: CustomerInput): FieldErrors {
 
 export function hasFieldErrors(errors: FieldErrors): boolean {
   return Boolean(errors.firstName || errors.lastName || errors.email);
+}
+
+function isValidEmail(value: string): boolean {
+  const match = EMAIL_PATTERN.exec(value);
+  if (!match) {
+    return false;
+  }
+  const local = match[1];
+  return (
+    !local.startsWith('.') && !local.endsWith('.') && !local.includes('..')
+  );
 }
 
 function checkName(

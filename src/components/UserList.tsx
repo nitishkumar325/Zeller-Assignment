@@ -1,16 +1,12 @@
 import React from 'react';
-import {
-  ActivityIndicator,
-  RefreshControl,
-  SectionList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { RefreshControl, SectionList } from 'react-native';
 import { colors } from '../theme';
 import type { Customer, ListTab } from '../types';
 import { customersForTab, groupByLetter } from '../utils/customerList';
+import { EmptyState } from './EmptyState';
+import { SectionHeader } from './SectionHeader';
 import { UserRow } from './UserRow';
+import { styles } from './UserList.styles';
 
 type Props = {
   customers: Customer[];
@@ -44,7 +40,7 @@ export function UserList({
         <UserRow customer={item} onPress={() => onPressCustomer(item.id)} />
       )}
       renderSectionHeader={({ section }) => (
-        <Text style={styles.sectionTitle}>{section.title}</Text>
+        <SectionHeader title={section.title} />
       )}
       stickySectionHeadersEnabled={false}
       contentContainerStyle={isEmpty ? styles.emptyGrow : styles.listContent}
@@ -56,76 +52,8 @@ export function UserList({
           colors={[colors.blue]}
         />
       }
-      ListEmptyComponent={
-        <EmptyState query={query} refreshing={refreshing} />
-      }
+      ListEmptyComponent={<EmptyState query={query} refreshing={refreshing} />}
       keyboardShouldPersistTaps="handled"
     />
   );
 }
-
-function EmptyState({
-  query,
-  refreshing,
-}: {
-  query: string;
-  refreshing: boolean;
-}) {
-  if (refreshing && !query.trim()) {
-    return (
-      <View style={styles.empty}>
-        <ActivityIndicator color={colors.blue} />
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.empty}>
-      <Text style={styles.emptyTitle}>
-        {query.trim() ? 'No matches' : 'No users yet'}
-      </Text>
-      <Text style={styles.emptyBody}>
-        {query.trim()
-          ? 'Try a different name.'
-          : 'Pull down to refresh, or add someone with the + button.'}
-      </Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingBottom: 110,
-  },
-  emptyGrow: {
-    flexGrow: 1,
-  },
-  sectionTitle: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 4,
-    color: colors.section,
-    fontSize: 13,
-    fontWeight: '500',
-    backgroundColor: colors.background,
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingTop: 48,
-  },
-  emptyTitle: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  emptyBody: {
-    color: colors.muted,
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 21,
-  },
-});

@@ -1,22 +1,16 @@
 import React, { useRef, useState } from 'react';
-import {
-  Animated,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Animated, SafeAreaView, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { PlusIcon, SearchIcon } from '../components/Icons';
+import { AddUserButton } from '../components/AddUserButton';
+import { ErrorBanner } from '../components/ErrorBanner';
+import { SearchButton } from '../components/SearchButton';
+import { SearchField } from '../components/SearchField';
 import { SlidingTabs } from '../components/SlidingTabs';
 import { UserList } from '../components/UserList';
-import { useCustomers } from '../state/CustomerProvider';
-import { colors } from '../theme';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { refreshCustomers } from '../store/customerSlice';
 import { LIST_TABS } from '../types';
+import { styles } from './CustomerListScreen.styles';
 
 type Props = {
   onAdd: () => void;
@@ -28,7 +22,10 @@ type Props = {
  * and the tab pill follows the finger.
  */
 export function CustomerListScreen({ onAdd, onOpenCustomer }: Props) {
-  const { customers, refreshing, refreshError, refresh } = useCustomers();
+  const dispatch = useAppDispatch();
+  const customers = useAppSelector(state => state.customers.customers);
+  const refreshing = useAppSelector(state => state.customers.refreshing);
+  const refreshError = useAppSelector(state => state.customers.refreshError);
   const pagerRef = useRef<PagerView>(null);
   const progress = useRef(new Animated.Value(0)).current;
   const [query, setQuery] = useState('');
@@ -47,40 +44,28 @@ export function CustomerListScreen({ onAdd, onOpenCustomer }: Props) {
     });
   };
 
+  const errorMessage = refreshError
+    ? customers.length === 0
+      ? `Couldn't load users from the API. ${refreshError}`
+      : `Showing saved users. ${refreshError}`
+    : '';
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <SlidingTabs tabs={LIST_TABS} progress={progress} onPress={goToPage} />
-        <Pressable
-          style={styles.searchButton}
+        <SearchButton
+          open={searchOpen}
+          active={query.length > 0}
           onPress={toggleSearch}
-          accessibilityRole="button"
-          accessibilityLabel={searchOpen ? 'Close search' : 'Search by name'}
-          testID="search-button">
-          <SearchIcon color={searchOpen || query ? colors.blue : colors.muted} />
-        </Pressable>
+        />
       </View>
 
       {searchOpen ? (
-        <TextInput
-          style={styles.searchInput}
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Search by name"
-          placeholderTextColor={colors.placeholder}
-          autoFocus
-          autoCorrect={false}
-          autoCapitalize="none"
-          clearButtonMode="while-editing"
-          testID="search-input"
-        />
+        <SearchField value={query} onChangeText={setQuery} />
       ) : null}
 
-      {refreshError ? (
-        <Text style={styles.errorBanner}>
-          Showing saved users. {refreshError}
-        </Text>
-      ) : null}
+      {refreshError ? <ErrorBanner message={errorMessage} /> : null}
 
       <PagerView
         ref={pagerRef}
@@ -89,7 +74,8 @@ export function CustomerListScreen({ onAdd, onOpenCustomer }: Props) {
         onPageScroll={event => {
           const { position, offset } = event.nativeEvent;
           progress.setValue(position + offset);
-        }}>
+        }}
+      >
         {LIST_TABS.map(tab => (
           <View key={tab} style={styles.page} collapsable={false}>
             <UserList
@@ -97,82 +83,16 @@ export function CustomerListScreen({ onAdd, onOpenCustomer }: Props) {
               tab={tab}
               query={query}
               refreshing={refreshing}
-              onRefresh={refresh}
+              onRefresh={() => {
+                dispatch(refreshCustomers());
+              }}
               onPressCustomer={onOpenCustomer}
             />
           </View>
         ))}
       </PagerView>
 
-      <Pressable
-        style={styles.fab}
-        onPress={onAdd}
-        accessibilityRole="button"
-        accessibilityLabel="Add user"
-        testID="add-user-button">
-        <PlusIcon />
-      </Pressable>
+      <AddUserButton onPress={onAdd} />
     </SafeAreaView>
   );
 }
-
-const androidTop = Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0;
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: androidTop,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  searchButton: {
-    width: 40,
-    height: 40,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchInput: {
-    marginHorizontal: 20,
-    marginBottom: 4,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.line,
-    fontSize: 16,
-    color: colors.text,
-  },
-  errorBanner: {
-    marginHorizontal: 20,
-    marginBottom: 4,
-    color: colors.danger,
-    fontSize: 13,
-  },
-  pager: {
-    flex: 1,
-  },
-  page: {
-    flex: 1,
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 28,
-    width: 56,
-    height: 56,
-    borderRadius: 14,
-    backgroundColor: colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#1B4FD8',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});

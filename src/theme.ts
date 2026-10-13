@@ -11,5 +11,4 @@ export const colors = {
   avatar: '#E7F0FF',
   placeholder: '#A3A3A8',
   danger: '#D92D20',
-  dangerSoft: '#FEF3F2',
 };
