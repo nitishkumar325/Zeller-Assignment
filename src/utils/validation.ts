@@ -30,20 +30,20 @@ export function validateCustomerForm(
   const lastName = input.lastName.trim();
   const email = input.email.trim();
 
-  const firstNameError = checkName(firstName, 'First name', true);
-  if (firstNameError) {
-    errors.firstName = firstNameError;
+  const firstErr = checkName(firstName, 'First name', true);
+  if (firstErr) {
+    errors.firstName = firstErr;
   }
 
-  const lastNameError = checkName(lastName, 'Last name', false);
-  if (lastNameError) {
-    errors.lastName = lastNameError;
+  const lastErr = checkName(lastName, 'Last name', false);
+  if (lastErr) {
+    errors.lastName = lastErr;
   }
 
   // The brief limits "name", so the two fields together count as well.
   if (!errors.firstName && !errors.lastName) {
-    const combined = `${firstName} ${lastName}`.trim();
-    if (combined.length > NAME_LIMIT) {
+    const full = `${firstName} ${lastName}`.trim();
+    if (full.length > NAME_LIMIT) {
       errors.firstName = 'Name must be 50 characters or fewer';
     }
   }

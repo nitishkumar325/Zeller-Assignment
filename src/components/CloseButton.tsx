@@ -11,8 +11,7 @@ export function CloseButton({ onPress }: Props) {
     <Pressable
       onPress={onPress}
       hitSlop={12}
-      accessibilityRole="button"
-      accessibilityLabel="Close"
+      
     >
       <Text style={styles.close}>✕</Text>
     </Pressable>

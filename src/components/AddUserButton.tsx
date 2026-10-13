@@ -12,8 +12,6 @@ export function AddUserButton({ onPress }: Props) {
     <Pressable
       style={styles.fab}
       onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel="Add user"
     >
       <PlusIcon />
     </Pressable>

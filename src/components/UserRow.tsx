@@ -17,9 +17,6 @@ export function UserRow({ customer, onPress }: Props) {
     <Pressable
       style={styles.row}
       onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${name}, ${customer.role}`}
-      accessibilityHint="Opens the edit screen"
     >
       <View style={styles.avatar}>
         <Text style={styles.initial}>{nameInitial(customer)}</Text>

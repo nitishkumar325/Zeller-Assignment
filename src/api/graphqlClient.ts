@@ -22,7 +22,7 @@ export async function graphqlRequest<T>(
   variables?: Record<string, unknown>,
 ): Promise<T> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
     const data = await client.request<T>({
@@ -42,8 +42,8 @@ export async function graphqlRequest<T>(
           JSON.stringify(error.response, null, 2),
         );
       }
-      const graphqlMessage = error.response.errors?.[0]?.message;
-      throw new Error(graphqlMessage ?? error.message);
+      const msg = error.response.errors?.[0]?.message;
+      throw new Error(msg ?? error.message);
     }
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('The request timed out');
@@ -53,6 +53,6 @@ export async function graphqlRequest<T>(
     }
     throw error;
   } finally {
-    clearTimeout(timeout);
+    clearTimeout(timer);
   }
 }

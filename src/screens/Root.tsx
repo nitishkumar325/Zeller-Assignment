@@ -33,12 +33,12 @@ export function Root({ realm }: Props) {
   useEffect(() => {
     setOpenRealm(realm);
     dispatch(customersLoaded(readCustomers(realm)));
-    const stopWatching = watchCustomers(realm, () => {
+    const stop = watchCustomers(realm, () => {
       dispatch(customersLoaded(readCustomers(realm)));
     });
     dispatch(refreshCustomers());
     return () => {
-      stopWatching();
+      stop();
       setOpenRealm(null);
     };
   }, [realm, dispatch]);
@@ -59,7 +59,7 @@ export function Root({ realm }: Props) {
     close();
   };
 
-  const formOpen = screen.name !== 'list';
+  const open = screen.name !== 'list';
 
   return (
     <View style={styles.root}>
@@ -68,7 +68,7 @@ export function Root({ realm }: Props) {
         onOpenCustomer={customerId => setScreen({ name: 'edit', customerId })}
       />
       <UserFormModal
-        visible={formOpen}
+        visible={open}
         formKey={screen.name === 'edit' ? screen.customerId : 'create'}
         title={screen.name === 'edit' ? 'Edit User' : 'New User'}
         submitLabel={screen.name === 'edit' ? 'Save Changes' : 'Create User'}

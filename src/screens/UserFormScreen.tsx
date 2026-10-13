@@ -46,9 +46,9 @@ export function UserFormScreen({
   const draft: CustomerInput = { firstName, lastName, email, role };
   const errors = showErrors ? validateCustomerForm(draft) : {};
 
-  const handleSubmit = () => {
-    const nextErrors = validateCustomerForm(draft);
-    if (hasFieldErrors(nextErrors)) {
+  const save = () => {
+    const errs = validateCustomerForm(draft);
+    if (hasFieldErrors(errs)) {
       setShowErrors(true);
       return;
     }
@@ -110,7 +110,7 @@ export function UserFormScreen({
         </ScrollView>
         <FormFooter
           submitLabel={submitLabel}
-          onSubmit={handleSubmit}
+          onSubmit={save}
           onDelete={onDelete ? confirmDelete : undefined}
         />
       </KeyboardAvoidingView>

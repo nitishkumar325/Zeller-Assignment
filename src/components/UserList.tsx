@@ -30,7 +30,7 @@ export function UserList({
   onPressCustomer,
 }: Props) {
   const sections = groupByLetter(customersForTab(customers, tab, query));
-  const isEmpty = sections.length === 0;
+  const empty = sections.length === 0;
 
   return (
     <SectionList
@@ -43,7 +43,7 @@ export function UserList({
         <SectionHeader title={section.title} />
       )}
       stickySectionHeadersEnabled={false}
-      contentContainerStyle={isEmpty ? styles.emptyGrow : styles.listContent}
+      contentContainerStyle={empty ? styles.emptyGrow : styles.listContent}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

@@ -19,7 +19,6 @@ export function FormFooter({ submitLabel, onSubmit, onDelete }: Props) {
       <Pressable
         style={styles.submit}
         onPress={onSubmit}
-        accessibilityRole="button"
       >
         <Text style={styles.submitText}>{submitLabel}</Text>
       </Pressable>

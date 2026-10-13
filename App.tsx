@@ -18,9 +18,9 @@ function App() {
     let active = true;
     setBootError(null);
     openCustomerRealm()
-      .then(instance => {
+      .then(db => {
         if (active) {
-          setRealm(instance);
+          setRealm(db);
         }
       })
       .catch(error => {

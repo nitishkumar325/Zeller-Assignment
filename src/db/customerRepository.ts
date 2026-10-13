@@ -22,8 +22,8 @@ type CustomerRow = {
 export function readCustomers(realm: Realm): Customer[] {
   const rows = realm.objects<CustomerRow>(CUSTOMER_SCHEMA);
   const customers: Customer[] = [];
-  for (let index = 0; index < rows.length; index += 1) {
-    customers.push(toPlain(rows[index]));
+  for (let i = 0; i < rows.length; i++) {
+    customers.push(toPlain(rows[i]));
   }
   return customers;
 }
@@ -31,8 +31,8 @@ export function readCustomers(realm: Realm): Customer[] {
 export function readDeletedIds(realm: Realm): string[] {
   const rows = realm.objects<{ id: string }>(DELETED_SCHEMA);
   const ids: string[] = [];
-  for (let index = 0; index < rows.length; index += 1) {
-    ids.push(rows[index].id);
+  for (let i = 0; i < rows.length; i++) {
+    ids.push(rows[i].id);
   }
   return ids;
 }
@@ -69,18 +69,18 @@ export function saveRemoteCustomers(
   realm: Realm,
   remoteCustomers: RemoteCustomer[],
 ): void {
-  const upserts = customersToUpsert(
+  const rows = customersToUpsert(
     readCustomers(realm),
     readDeletedIds(realm),
     remoteCustomers,
   );
 
-  if (upserts.length === 0) {
+  if (rows.length === 0) {
     return;
   }
 
   realm.write(() => {
-    for (const customer of upserts) {
+    for (const customer of rows) {
       realm.create(CUSTOMER_SCHEMA, customer, Realm.UpdateMode.Modified);
     }
   });

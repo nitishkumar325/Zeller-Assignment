@@ -21,8 +21,6 @@ export function RolePicker({ role, onChange }: Props) {
               key={option}
               style={[styles.roleButton, selected && styles.roleSelected]}
               onPress={() => onChange(option)}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
             >
               <Text
                 style={[styles.roleText, selected && styles.roleTextSelected]}

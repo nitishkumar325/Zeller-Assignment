@@ -33,8 +33,8 @@ export function customersToUpsert(
   remoteCustomers: RemoteCustomer[],
 ): Customer[] {
   const deleted = new Set(deletedIds);
-  const localById = new Map(existing.map(customer => [customer.id, customer]));
-  const upserts: Customer[] = [];
+  const byId = new Map(existing.map(customer => [customer.id, customer]));
+  const rows: Customer[] = [];
 
   console.log("remoteCustomers",remoteCustomers,deletedIds)
 
@@ -43,19 +43,19 @@ export function customersToUpsert(
       continue;
     }
 
-    const current = localById.get(remote.id);
-    if (current?.editedLocally || current?.isLocal) {
+    const saved = byId.get(remote.id);
+    if (saved?.editedLocally || saved?.isLocal) {
       continue;
     }
 
-    const next = remoteToCustomer(remote);
-    if (next) {
-      upserts.push(next);
+    const row = remoteToCustomer(remote);
+    if (row) {
+      rows.push(row);
     }
   }
-  console.log("upserts",upserts)
+  console.log("rows",rows)
 
-  return upserts;
+  return rows;
 }
 
 // The API is a free-form string. The tabs only know Admin and Manager.

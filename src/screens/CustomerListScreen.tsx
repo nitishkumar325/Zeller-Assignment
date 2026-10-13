@@ -44,7 +44,7 @@ export function CustomerListScreen({ onAdd, onOpenCustomer }: Props) {
     });
   };
 
-  const errorMessage = refreshError
+  const banner = refreshError
     ? customers.length === 0
       ? `Couldn't load users from the API. ${refreshError}`
       : `Showing saved users. ${refreshError}`
@@ -65,7 +65,7 @@ export function CustomerListScreen({ onAdd, onOpenCustomer }: Props) {
         <SearchField value={query} onChangeText={setQuery} />
       ) : null}
 
-      {refreshError ? <ErrorBanner message={errorMessage} /> : null}
+      {refreshError ? <ErrorBanner message={banner} /> : null}
 
       <PagerView
         ref={pagerRef}

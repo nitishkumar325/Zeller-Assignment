@@ -15,8 +15,6 @@ export function SearchButton({ open, active, onPress }: Props) {
     <Pressable
       style={styles.searchButton}
       onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={open ? 'Close search' : 'Search by name'}
     >
       <SearchIcon color={open || active ? colors.blue : colors.muted} />
     </Pressable>
